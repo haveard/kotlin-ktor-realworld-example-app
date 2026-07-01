@@ -16,7 +16,6 @@ permissions:
 jobs:
   spec-api:
     runs-on: ubuntu-latest
-    continue-on-error: true  # Several RealWorld spec endpoints are unimplemented stubs; failures here are expected and non-blocking
 
     steps:
       - uses: actions/checkout@v4
@@ -47,6 +46,7 @@ jobs:
           exit 1
 
       - name: Run API tests
+        continue-on-error: true  # Unimplemented stub endpoints cause expected failures; non-blocking
         env:
           APIURL: http://localhost:8080
         run: ./spec-api/run-api-tests.sh
