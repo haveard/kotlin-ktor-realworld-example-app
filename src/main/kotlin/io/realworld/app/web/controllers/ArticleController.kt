@@ -1,12 +1,16 @@
 package io.realworld.app.web.controllers
 
 import io.ktor.application.ApplicationCall
+import io.ktor.auth.authentication
+import io.ktor.auth.principal
 import io.ktor.request.receive
+import io.ktor.response.respond
 import io.realworld.app.domain.ArticleDTO
 import io.realworld.app.domain.ArticlesDTO
+import io.realworld.app.domain.User
+import io.realworld.app.domain.repository.ArticleRepository
 
-class ArticleController {
-//class ArticleController(private val articleService: ArticleService) {
+class ArticleController(private val articleRepository: ArticleRepository) {
 
     fun findBy(ctx: ApplicationCall): ArticlesDTO {
         val tag = ctx.parameters["tag"]
@@ -14,64 +18,56 @@ class ArticleController {
         val favorited = ctx.parameters["favorited"]
         val limit = ctx.parameters["limit"] ?: "20"
         val offset = ctx.parameters["offset"] ?: "0"
-//        articleService.findBy(tag, author, favorited, limit.toInt(), offset.toInt()).also { articles ->
-//            ctx.json(ArticlesDTO(articles, articles.size))
-//        }
-        return ArticlesDTO(listOf(), 1)
+        return ArticlesDTO(listOf(), 0)
     }
 
     fun feed(ctx: ApplicationCall): ArticlesDTO {
         val limit = ctx.parameters["limit"] ?: "20"
         val offset = ctx.parameters["offset"] ?: "0"
-//        articleService.findFeed(ctx.attribute("email"), limit.toInt(), offset.toInt()).also { articles ->
-//            ctx.json(ArticlesDTO(articles, articles.size))
-//        }
-        return ArticlesDTO(listOf(), 1)
+        return ArticlesDTO(listOf(), 0)
+    }
+
+    suspend fun popularFeed(ctx: ApplicationCall) {
+        val limit = ctx.parameters["limit"]?.toIntOrNull() ?: 20
+        val offset = ctx.parameters["offset"]?.toIntOrNull() ?: 0
+        val articles = articleRepository.findPopular(limit, offset)
+        ctx.respond(ArticlesDTO(articles, articles.size))
     }
 
     fun get(ctx: ApplicationCall): ArticleDTO {
         ctx.parameters["slug"]
-        //                articleService.findBySlug(slug).apply {
-//                    ctx.json(ArticleDTO(this))
-//                }
         return ArticleDTO(null)
     }
 
-    suspend fun create(ctx: ApplicationCall): ArticleDTO {
-        ctx.receive<ArticleDTO>()
-        //            articleService.create(ctx.attribute("email"), article).apply {
-//                ctx.json(ArticleDTO(this))
-//            }
-        return ArticleDTO(null)
+    suspend fun create(ctx: ApplicationCall) {
+        val email = ctx.authentication.principal<User>()?.email ?: return
+        val article = ctx.receive<ArticleDTO>().article ?: return
+        val created = articleRepository.create(email, article)
+        ctx.respond(ArticleDTO(created))
     }
 
     suspend fun update(ctx: ApplicationCall): ArticleDTO {
         val slug = ctx.parameters["slug"]
         ctx.receive<ArticleDTO>()
-        //            articleService.update(slug, article).apply {
-//                ctx.json(ArticleDTO(this))
-//            }
         return ArticleDTO(null)
     }
 
     fun delete(ctx: ApplicationCall) {
         ctx.parameters["slug"]
-        //            articleService.delete(slug)
     }
 
-    fun favorite(ctx: ApplicationCall): ArticleDTO {
-        ctx.parameters["slug"]
-        //            articleService.favorite(ctx.attribute("email"), slug).apply {
-//                ctx.json(ArticleDTO(this))
-//            }
-        return ArticleDTO(null)
+    suspend fun favorite(ctx: ApplicationCall) {
+        val email = ctx.authentication.principal<User>()?.email ?: return
+        val slug = ctx.parameters["slug"] ?: return
+        val article = articleRepository.favorite(email, slug)
+        ctx.respond(ArticleDTO(article))
     }
 
-    fun unfavorite(ctx: ApplicationCall): ArticleDTO {
-        ctx.parameters["slug"]
-        //            articleService.unfavorite(ctx.attribute("email"), slug).apply {
-//                ctx.json(ArticleDTO(this))
-//            }
-        return ArticleDTO(null)
+    suspend fun unfavorite(ctx: ApplicationCall) {
+        val email = ctx.authentication.principal<User>()?.email ?: return
+        val slug = ctx.parameters["slug"] ?: return
+        val article = articleRepository.unfavorite(email, slug)
+        ctx.respond(ArticleDTO(article))
     }
 }
+

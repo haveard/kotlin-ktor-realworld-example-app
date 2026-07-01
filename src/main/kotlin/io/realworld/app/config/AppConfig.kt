@@ -19,6 +19,11 @@ import io.ktor.server.engine.EngineAPI
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
+import io.realworld.app.domain.repository.ArticleFavorites
+import io.realworld.app.domain.repository.Articles
+import io.realworld.app.domain.repository.Follows
+import io.realworld.app.domain.repository.Tags
+import io.realworld.app.domain.repository.Users
 import io.realworld.app.utils.JwtProvider
 import io.realworld.app.web.ErrorResponse
 import io.realworld.app.web.articles
@@ -30,14 +35,19 @@ import io.realworld.app.web.controllers.UserController
 import io.realworld.app.web.profiles
 import io.realworld.app.web.tags
 import io.realworld.app.web.users
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.kodein.di.generic.instance
 
 const val SERVER_PORT = 8080
 
 @KtorExperimentalAPI
 @EngineAPI
-fun setup(isCio: Boolean = true): BaseApplicationEngine {
-    DbConfig.setup("jdbc:h2:mem:DATABASE_TO_UPPER=false;", "sa", "")
+fun setup(isCio: Boolean = true, dbName: String = "realworld"): BaseApplicationEngine {
+    DbConfig.setup("jdbc:h2:mem:$dbName;DATABASE_TO_UPPER=false;DB_CLOSE_DELAY=-1", "sa", "")
+    transaction {
+        SchemaUtils.create(Users, Follows, Tags, Articles, ArticleFavorites)
+    }
     return server(if (isCio) CIO else Netty)
 }
 

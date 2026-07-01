@@ -8,7 +8,8 @@ import org.junit.rules.ExternalResource
 import java.util.concurrent.TimeUnit
 
 class AppRule : ExternalResource() {
-    private val app = setup()
+    private val dbName = "testdb_${Thread.currentThread().id}_${System.nanoTime()}"
+    private val app = setup(dbName = dbName)
     lateinit var http: HttpUtil
     val port = app.environment.connectors.find { it.type == ConnectorType.HTTP }?.port ?: SERVER_PORT
 
@@ -19,6 +20,6 @@ class AppRule : ExternalResource() {
     }
 
     override fun after() {
-        app.stop(500, 500, TimeUnit.MILLISECONDS)
+        app.stop(500, 500)
     }
 }

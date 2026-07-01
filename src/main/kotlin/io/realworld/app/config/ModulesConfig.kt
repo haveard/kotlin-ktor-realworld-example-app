@@ -1,5 +1,6 @@
 package io.realworld.app.config
 
+import io.realworld.app.domain.repository.ArticleRepository
 import io.realworld.app.domain.repository.TagRepository
 import io.realworld.app.domain.repository.UserRepository
 import io.realworld.app.domain.service.TagService
@@ -22,7 +23,8 @@ object ModulesConfig {
         bind() from singleton { UserRepository() }
     }
     private val articleModule = Kodein.Module("ARTICLE") {
-        bind() from singleton { ArticleController() }
+        bind() from singleton { ArticleController(instance()) }
+        bind() from singleton { ArticleRepository(instance()) }
     }
     private val profileModule = Kodein.Module("PROFILE") {
         bind() from singleton { ProfileController() }
