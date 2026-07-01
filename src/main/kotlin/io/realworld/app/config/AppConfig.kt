@@ -9,6 +9,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
+import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.server.cio.CIO
@@ -66,6 +67,7 @@ fun Application.mainModule() {
     install(CallLogging)
     install(ContentNegotiation) {
         jackson {
+            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
     }
     install(Authentication) {
