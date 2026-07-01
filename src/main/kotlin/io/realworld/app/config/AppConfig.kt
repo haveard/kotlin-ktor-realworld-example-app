@@ -9,6 +9,7 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
+import com.fasterxml.jackson.databind.SerializationFeature
 import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.server.cio.CIO
@@ -20,7 +21,7 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
 import io.realworld.app.utils.JwtProvider
-import io.realworld.app.web.ErrorResponse
+import io.realworld.app.web.errorExceptionMapping
 import io.realworld.app.web.articles
 import io.realworld.app.web.controllers.ArticleController
 import io.realworld.app.web.controllers.CommentController
@@ -66,6 +67,7 @@ fun Application.mainModule() {
     install(CallLogging)
     install(ContentNegotiation) {
         jackson {
+            disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
         }
     }
     install(Authentication) {
@@ -80,12 +82,7 @@ fun Application.mainModule() {
         }
     }
     install(StatusPages) {
-        exception(Exception::class.java) {
-            val errorResponse = ErrorResponse(mapOf("error" to listOf("detail", this.toString())))
-            context.respond(
-                HttpStatusCode.InternalServerError, errorResponse
-            )
-        }
+        errorExceptionMapping()
     }
 
     install(Routing) {

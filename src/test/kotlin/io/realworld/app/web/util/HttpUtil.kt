@@ -67,7 +67,7 @@ class HttpUtil(port: Int) {
 
     fun createArticle(article: Article): HttpResponse<ArticleDTO> {
         createUser()
-        return post<ArticleDTO>("/api/articles", ArticleDTO(article))
+        return post<ArticleDTO>("/articles", ArticleDTO(article))
     }
 
     fun createArticle(): HttpResponse<ArticleDTO> {
@@ -79,5 +79,28 @@ class HttpUtil(port: Int) {
                 tagList = listOf("dragons", "training")
             )
         )
+    }
+
+    fun createArticleAs(
+        article: Article,
+        email: String,
+        username: String,
+        password: String = "password"
+    ): HttpResponse<ArticleDTO> {
+        registerUser(email, password, username)
+        loginAndSetTokenHeader(email, password)
+        return post<ArticleDTO>("/articles", ArticleDTO(article))
+    }
+
+    fun favoriteArticle(slug: String) =
+        post<ArticleDTO>("/articles/$slug/favorite")
+
+    fun unfavoriteArticle(slug: String) =
+        deleteWithResponseBody<ArticleDTO>("/articles/$slug/favorite")
+
+    fun registerAndLogin(email: String, username: String, password: String = "password"): UserDTO {
+        val user = registerUser(email, password, username)
+        loginAndSetTokenHeader(email, password)
+        return user
     }
 }
