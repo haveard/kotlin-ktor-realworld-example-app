@@ -1,5 +1,6 @@
 package io.realworld.app.web.util
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.mashape.unirest.http.HttpResponse
 import com.mashape.unirest.http.ObjectMapper
@@ -15,12 +16,15 @@ class HttpUtil(port: Int) {
 
     init {
         Unirest.setObjectMapper(object : ObjectMapper {
+            private val mapper = jacksonObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+
             override fun <T> readValue(value: String, valueType: Class<T>): T {
-                return jacksonObjectMapper().readValue(value, valueType)
+                return mapper.readValue(value, valueType)
             }
 
             override fun writeValue(value: Any): String {
-                return jacksonObjectMapper().writeValueAsString(value)
+                return mapper.writeValueAsString(value)
             }
         })
     }
@@ -67,7 +71,7 @@ class HttpUtil(port: Int) {
 
     fun createArticle(article: Article): HttpResponse<ArticleDTO> {
         createUser()
-        return post<ArticleDTO>("/api/articles", ArticleDTO(article))
+        return post<ArticleDTO>("/articles", ArticleDTO(article))
     }
 
     fun createArticle(): HttpResponse<ArticleDTO> {

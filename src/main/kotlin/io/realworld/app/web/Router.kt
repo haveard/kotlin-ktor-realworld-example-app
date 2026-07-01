@@ -42,8 +42,12 @@ fun Routing.profiles(profileController: ProfileController) {
 
 fun Routing.articles(articleController: ArticleController, commentController: CommentController) {
     route("articles") {
+        authenticate(optional = true) {
+            get { articleController.findBy(this.context) }
+        }
         authenticate {
             get("feed") { articleController.feed(this.context) }
+            post { articleController.create(this.context) }
             route("{slug}") {
                 route("comments") {
                     post { commentController.add(this.context) }
@@ -60,10 +64,6 @@ fun Routing.articles(articleController: ArticleController, commentController: Co
                 put { articleController.update(this.context) }
                 delete { articleController.delete(this.context) }
             }
-            authenticate(optional = true) {
-                get { articleController.findBy(this.context) }
-            }
-            post { articleController.create(this.context) }
         }
     }
 }

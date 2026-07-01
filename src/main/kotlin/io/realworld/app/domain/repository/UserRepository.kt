@@ -110,6 +110,12 @@ class UserRepository {
         }
     }
 
+    fun findFollowedUserIds(userId: Long): List<Long> {
+        return transaction {
+            Follows.select { Follows.follower eq userId }.map { it[Follows.user] }
+        }
+    }
+
     fun follow(email: String, usernameToFollow: String): User {
         val user = findByEmail(email) ?: throw NotFoundException("Email not found to follow")
         val userToFollow = findByUsername(usernameToFollow) ?: throw NotFoundException("Username not found to follow")

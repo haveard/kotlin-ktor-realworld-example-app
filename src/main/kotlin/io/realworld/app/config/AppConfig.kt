@@ -19,6 +19,7 @@ import io.ktor.server.engine.EngineAPI
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.util.KtorExperimentalAPI
+import io.realworld.app.domain.exceptions.NotFoundException
 import io.realworld.app.utils.JwtProvider
 import io.realworld.app.web.ErrorResponse
 import io.realworld.app.web.articles
@@ -37,7 +38,7 @@ const val SERVER_PORT = 8080
 @KtorExperimentalAPI
 @EngineAPI
 fun setup(isCio: Boolean = true): BaseApplicationEngine {
-    DbConfig.setup("jdbc:h2:mem:DATABASE_TO_UPPER=false;", "sa", "")
+    DbConfig.setup("jdbc:h2:mem:DATABASE_TO_UPPER=false;MV_STORE=FALSE;", "sa", "")
     return server(if (isCio) CIO else Netty)
 }
 
@@ -80,6 +81,10 @@ fun Application.mainModule() {
         }
     }
     install(StatusPages) {
+        exception(NotFoundException::class.java) {
+            val errorResponse = ErrorResponse(mapOf("error" to listOf("not found", it.message)))
+            context.respond(HttpStatusCode.NotFound, errorResponse)
+        }
         exception(Exception::class.java) {
             val errorResponse = ErrorResponse(mapOf("error" to listOf("detail", this.toString())))
             context.respond(
