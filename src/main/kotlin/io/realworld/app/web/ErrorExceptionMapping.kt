@@ -21,7 +21,7 @@ fun StatusPages.Configuration.errorExceptionMapping() {
     exception<IllegalArgumentException> { cause ->
         call.respond(HttpStatusCode.UnprocessableEntity, errorBody(cause.message))
     }
-    exception<Throwable> { cause ->
-        call.respond(HttpStatusCode.InternalServerError, errorBody(cause.message))
+    exception<Throwable> { _ ->
+        call.respond(HttpStatusCode.InternalServerError, errorBody("An unexpected error occurred."))
     }
 }

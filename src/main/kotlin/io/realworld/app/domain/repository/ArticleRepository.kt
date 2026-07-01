@@ -52,7 +52,16 @@ class ArticleRepository {
 
     fun create(article: Article, authorId: Long): Article {
         val now = System.currentTimeMillis()
-        val slug = article.title!!.toSlug()
+        val baseSlug = article.title!!.toSlug()
+        val slug = transaction {
+            var candidate = baseSlug
+            var suffix = 1
+            while (!Articles.select { Articles.slug eq candidate }.empty()) {
+                candidate = "$baseSlug-$suffix"
+                suffix++
+            }
+            candidate
+        }
         transaction {
             val articleId = Articles.insert { row ->
                 row[Articles.slug] = slug
