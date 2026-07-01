@@ -46,6 +46,19 @@ dependencies {
     implementation "org.jetbrains.exposed:exposed-dao:$exposed_version"
     implementation "org.jetbrains.exposed:exposed-jdbc:$exposed_version"
 
+    // Pin transitive dependencies to CVE-free versions (grype audit 2026-07-01)
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.14.3"
+    implementation "com.fasterxml.jackson.core:jackson-core:2.14.3"
     testImplementation "junit:junit:$junit_version"
     testImplementation "com.mashape.unirest:unirest-java:$unirest_version"
+}
+
+// Force Netty to a CVE-free version (grype audit 2026-07-01; ktor-netty pulls in 4.1.74.Final)
+configurations.all {
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'io.netty') {
+            details.useVersion '4.1.135.Final'
+            details.because 'CVE remediation: force all Netty modules to 4.1.135.Final'
+        }
+    }
 }
