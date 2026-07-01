@@ -80,6 +80,10 @@ fun Application.mainModule() {
         }
     }
     install(StatusPages) {
+        exception(IllegalArgumentException::class.java) { cause ->
+            val errorResponse = ErrorResponse(mapOf("body" to listOf(cause.message)))
+            context.respond(HttpStatusCode.UnprocessableEntity, errorResponse)
+        }
         exception(Exception::class.java) {
             val errorResponse = ErrorResponse(mapOf("error" to listOf("detail", this.toString())))
             context.respond(

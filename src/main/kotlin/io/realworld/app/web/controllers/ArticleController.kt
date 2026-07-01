@@ -38,7 +38,8 @@ class ArticleController {
     }
 
     suspend fun create(ctx: ApplicationCall): ArticleDTO {
-        ctx.receive<ArticleDTO>()
+        val articleDTO = ctx.receive<ArticleDTO>()
+        require(!articleDTO.article?.title.isNullOrBlank()) { "title can't be blank" }
         //            articleService.create(ctx.attribute("email"), article).apply {
 //                ctx.json(ArticleDTO(this))
 //            }
