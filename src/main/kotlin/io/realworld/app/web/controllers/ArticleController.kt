@@ -1,12 +1,15 @@
 package io.realworld.app.web.controllers
 
 import io.ktor.application.ApplicationCall
+import io.ktor.auth.principal
 import io.ktor.request.receive
+import io.ktor.response.respond
 import io.realworld.app.domain.ArticleDTO
 import io.realworld.app.domain.ArticlesDTO
+import io.realworld.app.domain.User
+import io.realworld.app.domain.service.ArticleService
 
-class ArticleController {
-//class ArticleController(private val articleService: ArticleService) {
+class ArticleController(private val articleService: ArticleService) {
 
     fun findBy(ctx: ApplicationCall): ArticlesDTO {
         val tag = ctx.parameters["tag"]
@@ -38,11 +41,21 @@ class ArticleController {
     }
 
     suspend fun create(ctx: ApplicationCall): ArticleDTO {
-        ctx.receive<ArticleDTO>()
-        //            articleService.create(ctx.attribute("email"), article).apply {
-//                ctx.json(ArticleDTO(this))
-//            }
-        return ArticleDTO(null)
+        val author = ctx.principal<User>()
+        val articleDTO = ctx.receive<ArticleDTO>()
+        val article = articleDTO.article
+        return if (author != null && article != null && !article.title.isNullOrBlank()) {
+            val created = articleService.create(
+                title = article.title,
+                description = article.description,
+                body = article.body,
+                authorId = author.id!!
+            )
+            ctx.respond(ArticleDTO(created))
+            ArticleDTO(created)
+        } else {
+            ArticleDTO(null)
+        }
     }
 
     suspend fun update(ctx: ApplicationCall): ArticleDTO {
@@ -59,12 +72,16 @@ class ArticleController {
         //            articleService.delete(slug)
     }
 
-    fun favorite(ctx: ApplicationCall): ArticleDTO {
-        ctx.parameters["slug"]
-        //            articleService.favorite(ctx.attribute("email"), slug).apply {
-//                ctx.json(ArticleDTO(this))
-//            }
-        return ArticleDTO(null)
+    suspend fun favorite(ctx: ApplicationCall): ArticleDTO {
+        val slug = ctx.parameters["slug"] ?: return ArticleDTO(null)
+        val user = ctx.principal<User>()
+        return if (user?.id != null) {
+            val favorited = articleService.favorite(slug, user.id)
+            ctx.respond(ArticleDTO(favorited))
+            ArticleDTO(favorited)
+        } else {
+            ArticleDTO(null)
+        }
     }
 
     fun unfavorite(ctx: ApplicationCall): ArticleDTO {

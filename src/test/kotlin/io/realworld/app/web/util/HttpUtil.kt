@@ -80,4 +80,12 @@ class HttpUtil(port: Int) {
             )
         )
     }
+
+    fun createPopularArticle(article: Article): HttpResponse<ArticleDTO> {
+        return post<ArticleDTO>("/articles", ArticleDTO(article))
+    }
+
+    fun favoriteArticle(slug: String): HttpResponse<ArticleDTO> {
+        return post<ArticleDTO>("/articles/$slug/favorite")
+    }
 }

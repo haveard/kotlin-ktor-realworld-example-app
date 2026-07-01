@@ -24,6 +24,7 @@ import io.realworld.app.web.ErrorResponse
 import io.realworld.app.web.articles
 import io.realworld.app.web.controllers.ArticleController
 import io.realworld.app.web.controllers.CommentController
+import io.realworld.app.web.controllers.PopularArticlesFeedController
 import io.realworld.app.web.controllers.ProfileController
 import io.realworld.app.web.controllers.TagController
 import io.realworld.app.web.controllers.UserController
@@ -62,6 +63,7 @@ fun Application.mainModule() {
     val articleController by ModulesConfig.kodein.instance<ArticleController>()
     val commentController by ModulesConfig.kodein.instance<CommentController>()
     val tagController by ModulesConfig.kodein.instance<TagController>()
+    val popularArticlesFeedController by ModulesConfig.kodein.instance<PopularArticlesFeedController>()
 
     install(CallLogging)
     install(ContentNegotiation) {
@@ -91,7 +93,7 @@ fun Application.mainModule() {
     install(Routing) {
         users(userController)
         profiles(profileController)
-        articles(articleController, commentController)
+        articles(articleController, commentController, popularArticlesFeedController)
         tags(tagController)
     }
 }

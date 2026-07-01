@@ -9,6 +9,7 @@ import io.ktor.routing.put
 import io.ktor.routing.route
 import io.realworld.app.web.controllers.ArticleController
 import io.realworld.app.web.controllers.CommentController
+import io.realworld.app.web.controllers.PopularArticlesFeedController
 import io.realworld.app.web.controllers.ProfileController
 import io.realworld.app.web.controllers.TagController
 import io.realworld.app.web.controllers.UserController
@@ -40,8 +41,12 @@ fun Routing.profiles(profileController: ProfileController) {
     }
 }
 
-fun Routing.articles(articleController: ArticleController, commentController: CommentController) {
+fun Routing.articles(articleController: ArticleController, commentController: CommentController,
+                     popularArticlesFeedController: PopularArticlesFeedController) {
     route("articles") {
+        authenticate(optional = true) {
+            get("popular") { popularArticlesFeedController.getPopular(this.context) }
+        }
         authenticate {
             get("feed") { articleController.feed(this.context) }
             route("{slug}") {
