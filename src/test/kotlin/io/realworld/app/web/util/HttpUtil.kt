@@ -46,6 +46,12 @@ class HttpUtil(port: Int) {
     fun delete(path: String) =
         Unirest.delete(origin + path).headers(headers).asString()
 
+    fun postRaw(path: String) =
+        Unirest.post(origin + path).headers(headers).asString()
+
+    fun postRaw(path: String, body: Any) =
+        Unirest.post(origin + path).headers(headers).body(body).asString()
+
     fun loginAndSetTokenHeader(email: String, password: String) {
         val userDTO = UserDTO(User(email = email, password = password))
         val response = post<UserDTO>("/users/login", userDTO)
