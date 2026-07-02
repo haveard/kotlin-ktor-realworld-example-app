@@ -38,7 +38,8 @@ const val SERVER_PORT = 8080
 @KtorExperimentalAPI
 @EngineAPI
 fun setup(isCio: Boolean = true): BaseApplicationEngine {
-    DbConfig.setup("jdbc:h2:mem:DATABASE_TO_UPPER=false;", "sa", "")
+    val dbName = "db_${java.util.UUID.randomUUID().toString().replace("-", "")}"
+    DbConfig.setup("jdbc:h2:mem:$dbName;DATABASE_TO_UPPER=false;", "sa", "")
     return server(if (isCio) CIO else Netty)
 }
 
