@@ -40,7 +40,7 @@ class PopularArticlesFeedControllerTest {
 
         assertEquals(HttpStatus.SC_OK, response.status)
         assertTrue(response.body.articlesCount > 0)
-        assertEquals(response.body.articles.size, response.body.articlesCount)
+        assertEquals(response.body.articlesCount, response.body.articles.size)
 
         // Most favorited article should come first
         val first = response.body.articles.first()
